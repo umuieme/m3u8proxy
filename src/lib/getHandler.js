@@ -56,6 +56,7 @@ export default function getHandler(options, proxy) {
   };
 
   return function (req, res) {
+    console.log("req.url", req.url);
     req.corsAnywhereRequestState = {
       getProxyForUrl: corsAnywhere.getProxyForUrl,
       maxRedirects: corsAnywhere.maxRedirects,
@@ -77,7 +78,7 @@ export default function getHandler(options, proxy) {
     ) {
       return;
     }
-
+    console.log("location", location);
     if (!location) {
       if (/^\/https?:\/[^/]/i.test(req.url)) {
         res.writeHead(400, "Missing slash", cors_headers);
@@ -106,6 +107,7 @@ export default function getHandler(options, proxy) {
     }
 
     if (!/^\/https?:/.test(req.url) && !isValidHostName(location.hostname)) {
+     console.log("location.hostname", location.hostname);
       const uri = new URL(req.url ?? web_server_url, "http://localhost:3000");
       if (uri.pathname === "/m3u8-proxy") {
         let headers = {};
@@ -117,6 +119,7 @@ export default function getHandler(options, proxy) {
           return;
         }
         const url = uri.searchParams.get("url");
+        console.log("url", url);
         return proxyM3U8(url ?? "", headers, res);
       } else if (uri.pathname === "/ts-proxy") {
         let headers = {};
@@ -137,7 +140,7 @@ export default function getHandler(options, proxy) {
         return;
       }
     }
-
+    console.log("hasRequiredHeaders", hasRequiredHeaders(req.headers));
     if (!hasRequiredHeaders(req.headers)) {
       res.writeHead(400, "Header required", cors_headers);
       res.end(
@@ -203,7 +206,7 @@ export default function getHandler(options, proxy) {
       /^\s*https/.test(req.headers["x-forwarded-proto"]);
     const proxyBaseUrl =
       (isRequestedOverHttps ? "https://" : "http://") + req.headers.host;
-
+    console.log("proxyBaseUrl", proxyBaseUrl);
     corsAnywhere.removeHeaders.forEach(function (header) {
       delete req.headers[header];
     });
@@ -214,7 +217,7 @@ export default function getHandler(options, proxy) {
 
     req.corsAnywhereRequestState.location = location;
     req.corsAnywhereRequestState.proxyBaseUrl = proxyBaseUrl;
-
+    console.log("proxy request called")
     proxyRequest(req, res, proxy);
   };
 }

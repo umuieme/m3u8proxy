@@ -8,6 +8,8 @@ const port = process.env.PORT || 8080;
 const web_server_url = process.env.PUBLIC_URL || `http://${host}:${port}`;
 
 export default async function proxyM3U8(url, headers, res) {
+  console.log("url", url);
+  console.log("headers", headers);
   const req = await axios(url, {
     headers: headers,
   }).catch((err) => {
@@ -15,7 +17,9 @@ export default async function proxyM3U8(url, headers, res) {
     res.end(err.message);
     return null;
   });
+  console.log("req", req);
   if (!req) {
+    console.log("req is null");
     return;
   }
   const m3u8 = req.data

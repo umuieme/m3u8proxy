@@ -41,6 +41,9 @@ export default function createServer(options) {
   };
 
   const isOriginAllowed = (origin, options) => {
+    console.log("Origin:", origin);
+    console.log("Origin whitelist:", options.originWhitelist);
+    console.log("Origin blacklist:", options.originBlacklist);
     if (options.originWhitelist.includes("*")) {
       return true;
     }
@@ -58,7 +61,7 @@ export default function createServer(options) {
     }
     return true;
   };
-
+  console.log("httpsOptions", options.httpsOptions);
   if (options.httpsOptions) {
     server = https.createServer(options.httpsOptions, (req, res) => {
       const origin = req.headers.origin || "";
@@ -71,10 +74,12 @@ export default function createServer(options) {
       }
       if (handleCors(req, res)) return;
       requestHandler(req, res);
+      printf("requestHandler ==", requestHandler(req, res));
     });
   } else {
     server = http.createServer((req, res) => {
       const origin = req.headers.origin || "";
+      console.log("isOriginAllowed", isOriginAllowed(origin, options));
       if (!isOriginAllowed(origin, options)) {
         res.writeHead(403, "Forbidden");
         res.end(
@@ -83,6 +88,7 @@ export default function createServer(options) {
         return;
       }
       if (handleCors(req, res)) return;
+      console.log("requestHandler ==");
       requestHandler(req, res);
     });
   }
